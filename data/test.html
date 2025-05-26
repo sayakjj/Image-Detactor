@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI vs Real Image Detector</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background: linear-gradient(135deg, #2b1055, #7597de);
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #f0f0f0;
+    padding: 2rem 1rem;
+  }
+
+  h1 {
+    font-weight: 600;
+    font-size: 2.5rem;
+    margin-bottom: 0.25rem;
+    text-align: center;
+    text-shadow: 0 0 8px rgba(0,0,0,0.3);
+  }
+
+  p.subtitle {
+    font-weight: 400;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: #cfd8fccc;
+  }
+
+  .upload-container {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  input[type="file"] {
+    outline: none;
+    font-size: 1rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background-color: #4961dbcc;
+    color: white;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    transition: background-color 0.3s ease;
+  }
+
+  input[type="file"]:hover {
+    background-color: #3752b4dd;
+  }
+
+  #image-preview {
+    width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+
+  button#detect-btn {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    background-color: #f9a825;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    color: #2b1055;
+    cursor: pointer;
+    box-shadow: 0 6px 12px #c17900;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+
+  button#detect-btn:disabled {
+    background-color: #aaa;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  button#detect-btn:hover:not(:disabled) {
+    background-color: #ddb324;
+    box-shadow: 0 8px 20px #d2a900;
+  }
+
+  .result {
+    margin-top: 2rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    color: white;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    user-select: none;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  }
+
+  .result.real {
+    background: linear-gradient(135deg, #56ab2f, #a8e063);
+    text-shadow: 1px 1px 3px #2a5e11;
+  }
+
+  .result.ai {
+    background: linear-gradient(135deg, #e52d27, #b31217);
+    text-shadow: 1px 1px 3px #620909;
+  }
+</style>
+</head>
+<body>
+  <h1>AI vs Real Image Detector</h1>
+  <p class="subtitle">Upload an image and see if it is real or AI-generated!</p>
+
+  <div class="upload-container">
+    <input type="file" id="image-input" accept="image/*" />
+    <img id="image-preview" alt="Image Preview" />
+    <button id="detect-btn" disabled>Detect</button>
+  </div>
+
+  <div id="result" class="result" style="display:none;"></div>
+
+  <script>
+    const imageInput = document.getElementById('image-input');
+    const imagePreview = document.getElementById('image-preview');
+    const detectBtn = document.getElementById('detect-btn');
+    const resultBox = document.getElementById('result');
+
+    let uploadedImage = null;
+
+    imageInput.addEventListener('change', () => {
+      const file = imageInput.files[0];
+      resultBox.style.display = 'none';
+      if (!file) {
+        imagePreview.style.display = 'none';
+        detectBtn.disabled = true;
+        return;
+      }
+
+      const objectUrl = URL.createObjectURL(file);
+      imagePreview.src = objectUrl;
+      imagePreview.style.display = 'block';
+      uploadedImage = file;
+      detectBtn.disabled = false;
+    });
+
+   
+    function simulateDetection(file) {
+      
+      if (!file) return null;
+      const sizeKB = file.size / 1024;
+
+      
+      const rand = Math.random();
+
+      
+      if (sizeKB > 500 && rand > 0.3) return 'real';
+      return 'ai';
+    }
+
+    detectBtn.addEventListener('click', () => {
+      if (!uploadedImage) return;
+      detectBtn.disabled = true;
+      resultBox.style.display = 'none';
+      detectBtn.textContent = 'Detecting...';
+
+     
+      setTimeout(() => {
+        const detected = simulateDetection(uploadedImage);
+        let message, cls;
+        if (detected === 'real') {
+          message = "This image is likely a Real Photo 📸";
+          cls = 'real';
+        } else if (detected === 'ai') {
+          message = "This image is likely AI-Generated 🤖";
+          cls = 'ai';
+        } else {
+          message = "Could not determine the image type";
+          cls = '';
+        }
+        resultBox.textContent = message;
+        resultBox.className = 'result ' + cls;
+        resultBox.style.display = 'block';
+        detectBtn.textContent = 'Detect';
+        detectBtn.disabled = false;
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
+
